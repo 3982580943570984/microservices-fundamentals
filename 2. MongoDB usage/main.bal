@@ -85,7 +85,7 @@ service on new http:Listener(8080) {
         mongodb:DeleteResult deleteResult = check pollEntries->deleteOne({id});
 
         if deleteResult.deletedCount != 1 {
-            return error(string `Failed to delete the movie with id ${id}`);
+            return error(string `Failed to delete the poll with id ${id}`);
         }
 
         return id;
