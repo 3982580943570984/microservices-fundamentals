@@ -1,0 +1,60 @@
+services:
+  database:
+    image: postgres:latest
+    container_name: postgresql
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=database
+      - POSTGRES_HOST_AUTH_METHOD=trust
+      - POSTGRES_USER=postgres
+    ports:
+      - 5432:5432
+    networks:
+      - network
+    volumes:
+      - ./modules/database/script.sql:/docker-entrypoint-initdb.d/01-script.sql
+      - ./modules/database/data.sql:/docker-entrypoint-initdb.d/02-data.sql
+
+  broker:
+    image: confluentinc/confluent-local:latest
+    container_name: kafka
+    restart: unless-stopped
+    ports:
+      - 29092:29092
+      - 8082:8082
+      - 9092:9092
+    networks:
+      - network
+
+  cache:
+    image: redis:latest
+    container_name: redis
+    restart: unless-stopped
+    ports:
+      - 6379:6379
+    networks:
+      - network
+
+  # service:
+  #   build:
+  #     context: ./target/docker/kafka_usage
+  #     dockerfile: Dockerfile
+  #   image: service:latest
+  #   container_name: ballerina
+  #   ports:
+  #     - 8000:8000
+  #     - 8001:8001
+  #     - 9090:9090
+  #   restart: unless-stopped
+  #   networks:
+  #     - network
+  #   depends_on:
+  #     - database
+  #     - cache
+  #     - broker
+  #   volumes:
+  #     - ./Config.toml:/home/ballerina/Config.toml
+
+networks:
+  network:
+    driver: bridge
