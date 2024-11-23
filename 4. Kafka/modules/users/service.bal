@@ -12,9 +12,6 @@ configurable int usersPort = ?;
 configurable string redisHost = ?;
 configurable int redisPort = ?;
 
-// configurable string kafkaHost = ?;
-// configurable int kafkaPort = ?;
-
 service on new http:Listener(usersPort) {
     private final redis:Client redis;
     private final database:Client 'client;

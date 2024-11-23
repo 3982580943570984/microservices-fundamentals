@@ -11,9 +11,6 @@ configurable int pollsPort = ?;
 configurable string redisHost = ?;
 configurable int redisPort = ?;
 
-// configurable string kafkaHost = ?;
-// configurable int kafkaPort = ?;
-
 service on new http:Listener(pollsPort) {
     private final redis:Client redis;
     private final kafka:Consumer consumer;
