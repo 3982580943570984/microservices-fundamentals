@@ -5,21 +5,6 @@ import ballerina/persist;
 
 configurable int port = ?;
 
-@http:ServiceConfig {
-    auth: [
-        {
-            jwtValidatorConfig: {
-                issuer: "wso2",
-                audience: "ballerina",
-                signatureConfig: {
-                    certFile: "/path/to/public.crt"
-                },
-                scopeKey: "scp"
-            },
-            scopes: ["admin"]
-        }
-    ]
-}
 service on new http:Listener(port) {
     private final database:Client 'client;
 
