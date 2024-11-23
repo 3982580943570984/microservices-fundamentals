@@ -1,34 +1,22 @@
-import kafka_usage.database;
-import kafka_usage.types;
+import polls_service.database;
 
 import ballerina/http;
 import ballerina/persist;
 import ballerinax/kafka;
-import ballerinax/redis;
 
-configurable int pollsPort = ?;
+import nixos/shared_types as types;
 
-configurable string redisHost = ?;
-configurable int redisPort = ?;
+configurable int port = ?;
 
-service on new http:Listener(pollsPort) {
-    private final redis:Client redis;
-    private final kafka:Consumer consumer;
+configurable string kafkaHost = ?;
+configurable int kafkaPort = ?;
+
+service on new http:Listener(port) {
     private final kafka:Producer producer;
     private final database:Client 'client;
 
     public function init() returns error? {
-        self.redis = check new ({
-            connection: {
-                host: redisHost,
-                port: redisPort
-            }
-        });
-
-        self.consumer = check new (kafka:DEFAULT_URL);
-
-        self.producer = check new (kafka:DEFAULT_URL);
-
+        self.producer = check new (string `${kafkaHost}:${kafkaPort}`);
         self.'client = check new ();
     };
 
@@ -72,7 +60,7 @@ service on new http:Listener(pollsPort) {
     }
 }
 
-service on new kafka:Listener(kafka:DEFAULT_URL, {
+service on new kafka:Listener(string `${kafkaHost}:${kafkaPort}`, {
     groupId: "user-group-id",
     topics: "user-poll"
 }) {
@@ -80,7 +68,7 @@ service on new kafka:Listener(kafka:DEFAULT_URL, {
     private final database:Client 'client;
 
     public function init() returns error? {
-        self.producer = check new (kafka:DEFAULT_URL);
+        self.producer = check new (string `${kafkaHost}:${kafkaPort}`);
         self.'client = check new ();
     }
 

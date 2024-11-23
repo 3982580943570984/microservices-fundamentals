@@ -32,6 +32,14 @@ dependencies = [
 
 [[package]]
 org = "ballerina"
+name = "cloud"
+version = "3.1.0"
+modules = [
+	{org = "ballerina", packageName = "cloud", moduleName = "cloud"}
+]
+
+[[package]]
+org = "ballerina"
 name = "constraint"
 version = "1.5.0"
 dependencies = [
@@ -289,9 +297,6 @@ version = "2.5.0"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"}
 ]
-modules = [
-	{org = "ballerina", packageName = "time", moduleName = "time"}
-]
 
 [[package]]
 org = "ballerina"
@@ -377,39 +382,35 @@ modules = [
 ]
 
 [[package]]
-org = "ballerinax"
-name = "redis"
-version = "3.0.2"
-dependencies = [
-	{org = "ballerina", name = "crypto"},
-	{org = "ballerina", name = "jballerina.java"}
-]
-modules = [
-	{org = "ballerinax", packageName = "redis", moduleName = "redis"}
-]
-
-[[package]]
 org = "nixos"
-name = "kafka_usage"
+name = "polls_service"
 version = "0.1.0"
 dependencies = [
+	{org = "ballerina", name = "cloud"},
 	{org = "ballerina", name = "http"},
 	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "persist"},
 	{org = "ballerina", name = "sql"},
-	{org = "ballerina", name = "time"},
 	{org = "ballerinai", name = "observe"},
 	{org = "ballerinax", name = "kafka"},
 	{org = "ballerinax", name = "persist.sql"},
 	{org = "ballerinax", name = "postgresql"},
 	{org = "ballerinax", name = "postgresql.driver"},
-	{org = "ballerinax", name = "redis"}
+	{org = "nixos", name = "shared_types"}
 ]
 modules = [
-	{org = "nixos", packageName = "kafka_usage", moduleName = "kafka_usage"},
-	{org = "nixos", packageName = "kafka_usage", moduleName = "kafka_usage.database"},
-	{org = "nixos", packageName = "kafka_usage", moduleName = "kafka_usage.polls"},
-	{org = "nixos", packageName = "kafka_usage", moduleName = "kafka_usage.types"},
-	{org = "nixos", packageName = "kafka_usage", moduleName = "kafka_usage.users"}
+	{org = "nixos", packageName = "polls_service", moduleName = "polls_service"},
+	{org = "nixos", packageName = "polls_service", moduleName = "polls_service.database"}
+]
+
+[[package]]
+org = "nixos"
+name = "shared_types"
+version = "0.1.0"
+dependencies = [
+	{org = "ballerinai", name = "observe"}
+]
+modules = [
+	{org = "nixos", packageName = "shared_types", moduleName = "shared_types"}
 ]
 

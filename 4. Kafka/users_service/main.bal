@@ -1,29 +1,21 @@
-import kafka_usage.database;
-import kafka_usage.types;
+import users_service.database;
 
 import ballerina/http;
 import ballerina/persist;
 import ballerina/time;
 import ballerinax/kafka;
-import ballerinax/redis;
 
-configurable int usersPort = ?;
+import nixos/shared_types as types;
 
-configurable string redisHost = ?;
-configurable int redisPort = ?;
+configurable int port = ?;
 
-service on new http:Listener(usersPort) {
-    private final redis:Client redis;
+configurable string kafkaHost = ?;
+configurable int kafkaPort = ?;
+
+service on new http:Listener(port) {
     private final database:Client 'client;
 
     public function init() returns error? {
-        self.redis = check new ({
-            connection: {
-                host: redisHost,
-                port: redisPort
-            }
-        });
-
         self.'client = check new ();
     }
 
@@ -54,16 +46,16 @@ service on new http:Listener(usersPort) {
     }
 }
 
-service on new kafka:Listener(kafka:DEFAULT_URL, {
+service on new kafka:Listener(string `${kafkaHost}:${kafkaPort}`, {
     groupId: "polls-group-id",
     topics: "poll-user"
 }) {
-    private final kafka:Producer producer;
     private final database:Client 'client;
+    private final kafka:Producer producer;
 
     public function init() returns error? {
-        self.producer = check new (kafka:DEFAULT_URL);
         self.'client = check new ();
+        self.producer = check new (string `${kafkaHost}:${kafkaPort}`);
     }
 
     remote function onConsumerRecord(types:Confirmation[] confirmations) returns error? {

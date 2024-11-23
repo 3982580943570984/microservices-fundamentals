@@ -1,0 +1,21 @@
+[package]
+org = "nixos"
+name = "users_service"
+version = "0.1.0"
+distribution = "2201.10.1"
+
+[build-options]
+observabilityIncluded = true
+cloud = "docker"
+
+[[dependency]]
+org = "nixos"
+name = "shared_types"
+version="0.1.0"
+repository="local"
+
+[[platform.java17.dependency]]
+groupId = "io.ballerina.stdlib"
+artifactId = "persist.sql-native"
+version = "1.4.0"
+

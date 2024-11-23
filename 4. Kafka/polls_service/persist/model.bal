@@ -14,10 +14,3 @@ public type Vote record {|
     int answers;
     Poll poll;
 |};
-
-public type User record {|
-    readonly string id;
-    string name;
-    string email;
-    int registeredObjects;
-|};

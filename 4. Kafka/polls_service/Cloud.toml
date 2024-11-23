@@ -10,7 +10,7 @@
 #
 # Properties related to the container image
 [container.image]
-name = "services" # Name of the container image
+name = "polls_service" # Name of the container image
 #repository = "ballerina" # Container repository to host the container
 #tag = "latest" # Tag of the container
 #base = "ballerina/jvm-runtime:2.0" # Base container of the container image

@@ -12,7 +12,6 @@ import ballerinax/postgresql.driver as _;
 
 const POLL = "polls";
 const VOTE = "votes";
-const USER = "users";
 
 public isolated client class Client {
     *persist:AbstractPersistClient;
@@ -53,17 +52,6 @@ public isolated client class Client {
             },
             keyFields: ["id"],
             joinMetadata: {poll: {entity: Poll, fieldName: "poll", refTable: "Poll", refColumns: ["id"], joinColumns: ["pollId"], 'type: psql:ONE_TO_MANY}}
-        },
-        [USER]: {
-            entityName: "User",
-            tableName: "User",
-            fieldMetadata: {
-                id: {columnName: "id"},
-                name: {columnName: "name"},
-                email: {columnName: "email"},
-                registeredObjects: {columnName: "registeredObjects"}
-            },
-            keyFields: ["id"]
         }
     };
 
@@ -75,8 +63,7 @@ public isolated client class Client {
         self.dbClient = dbClient;
         self.persistClients = {
             [POLL]: check new (dbClient, self.metadata.get(POLL), psql:POSTGRESQL_SPECIFICS),
-            [VOTE]: check new (dbClient, self.metadata.get(VOTE), psql:POSTGRESQL_SPECIFICS),
-            [USER]: check new (dbClient, self.metadata.get(USER), psql:POSTGRESQL_SPECIFICS)
+            [VOTE]: check new (dbClient, self.metadata.get(VOTE), psql:POSTGRESQL_SPECIFICS)
         };
     }
 
@@ -153,45 +140,6 @@ public isolated client class Client {
         psql:SQLClient sqlClient;
         lock {
             sqlClient = self.persistClients.get(VOTE);
-        }
-        _ = check sqlClient.runDeleteQuery(id);
-        return result;
-    }
-
-    isolated resource function get users(UserTargetType targetType = <>, sql:ParameterizedQuery whereClause = ``, sql:ParameterizedQuery orderByClause = ``, sql:ParameterizedQuery limitClause = ``, sql:ParameterizedQuery groupByClause = ``) returns stream<targetType, persist:Error?> = @java:Method {
-        'class: "io.ballerina.stdlib.persist.sql.datastore.PostgreSQLProcessor",
-        name: "query"
-    } external;
-
-    isolated resource function get users/[string id](UserTargetType targetType = <>) returns targetType|persist:Error = @java:Method {
-        'class: "io.ballerina.stdlib.persist.sql.datastore.PostgreSQLProcessor",
-        name: "queryOne"
-    } external;
-
-    isolated resource function post users(UserInsert[] data) returns string[]|persist:Error {
-        psql:SQLClient sqlClient;
-        lock {
-            sqlClient = self.persistClients.get(USER);
-        }
-        _ = check sqlClient.runBatchInsertQuery(data);
-        return from UserInsert inserted in data
-            select inserted.id;
-    }
-
-    isolated resource function put users/[string id](UserUpdate value) returns User|persist:Error {
-        psql:SQLClient sqlClient;
-        lock {
-            sqlClient = self.persistClients.get(USER);
-        }
-        _ = check sqlClient.runUpdateQuery(id, value);
-        return self->/users/[id].get();
-    }
-
-    isolated resource function delete users/[string id]() returns User|persist:Error {
-        User result = check self->/users/[id].get();
-        psql:SQLClient sqlClient;
-        lock {
-            sqlClient = self.persistClients.get(USER);
         }
         _ = check sqlClient.runDeleteQuery(id);
         return result;
