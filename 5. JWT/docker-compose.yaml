@@ -1,0 +1,72 @@
+services:
+  polls_storage:
+    image: postgres:latest
+    container_name: polls_storage
+    restart: unless-stopped
+    environment:
+      - PGPORT=5432
+      - POSTGRES_DB=database
+      - POSTGRES_HOST_AUTH_METHOD=trust
+      - POSTGRES_USER=postgres
+    ports:
+      - 5432:5432
+    volumes:
+      - ./polls_service/modules/database/script.sql:/docker-entrypoint-initdb.d/01-script.sql
+    #   - ./modules/database/data.sql:/docker-entrypoint-initdb.d/02-data.sql
+
+  polls_service:
+    build:
+      context: ./polls_service/target/docker/polls_service
+      dockerfile: Dockerfile
+    image: polls_service:latest
+    container_name: polls_service
+    restart: unless-stopped
+    ports:
+      - 8001:8001
+    depends_on:
+      - polls_storage
+    volumes:
+      - ./polls_service/Config.toml:/home/ballerina/Config.toml
+
+  users_storage:
+    image: postgres:latest
+    container_name: users_storage
+    restart: unless-stopped
+    environment:
+      - PGPORT=5433
+      - POSTGRES_DB=database
+      - POSTGRES_HOST_AUTH_METHOD=trust
+      - POSTGRES_USER=postgres
+    ports:
+      - 5433:5433
+    volumes:
+      - ./users_service/modules/database/script.sql:/docker-entrypoint-initdb.d/01-script.sql
+    #   - ./modules/database/data.sql:/docker-entrypoint-initdb.d/02-data.sql
+
+  users_service:
+    build:
+      context: ./users_service/target/docker/users_service
+      dockerfile: Dockerfile
+    image: users_service:latest
+    container_name: users_service
+    restart: unless-stopped
+    ports:
+      - 8002:8002
+    depends_on:
+      - users_storage
+    volumes:
+      - ./users_service/Config.toml:/home/ballerina/Config.toml
+
+  api_gateway:
+    build:
+      context: ./api_gateway/target/docker/api_gateway
+      dockerfile: Dockerfile
+    image: api_gateway:latest
+    container_name: api_gateway
+    restart: unless-stopped
+    ports:
+      - 8003:8003
+    volumes:
+      - ./api_gateway/Config.toml:/home/ballerina/Config.toml
+      - ./api_gateway/resources/private.key:/home/ballerina/resources/private.key
+      - ./api_gateway/resources/public.crt:/home/ballerina/resources/public.crt
