@@ -36,17 +36,31 @@ service on new http:Listener(port) {
         };
     }
 
-    resource function get jwt() returns string|error? {
+    resource function get jwt() returns string|error {
         return check jwt:issue(self.issuerConfig);
     }
 
-    resource function get users(string jwt) returns json[]|error? {
+    resource function get users(string jwt) returns json[]|error {
         jwt:Payload _ = check jwt:validate(jwt, self.validatorConfig);
         return check self.usersClient->/users;
     }
 
-    resource function get polls(string jwt) returns json[]|error? {
+    resource function get polls(string jwt) returns json[]|error {
         jwt:Payload _ = check jwt:validate(jwt, self.validatorConfig);
         return check self.pollsClient->/polls;
+    }
+}
+
+public client class GatewayClientStub {
+    resource function get jwt() returns string|error {
+        return error("Stub method");
+    }
+
+    resource function get users(string jwt) returns json[]|error {
+        return error("Stub method");
+    }
+
+    resource function get polls(string jwt) returns json[]|error {
+        return error("Stub method");
     }
 }

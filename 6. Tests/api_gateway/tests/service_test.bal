@@ -1,64 +1,107 @@
-import ballerina/http;
 import ballerina/test;
-
-http:Client gatewayClient = check new (string `http://localhost:${port}`);
 
 @test:Config
 public function testGetJwt() returns error? {
-    http:Response response = check gatewayClient->/jwt.get();
+    GatewayClientStub gateway = test:mock(GatewayClientStub);
 
-    test:assertEquals(response.statusCode, http:STATUS_OK);
+    string jwt = "";
+
+    test:prepare(gateway)
+        .whenResource("jwt")
+        .onMethod("get")
+        .thenReturn(jwt);
+
+    var response = gateway->/jwt();
+
+    test:assertTrue(response is string);
+    test:assertExactEquals(response, jwt);
 }
 
 @test:Config
 public function testGetUsersWithInvalidJwt() returns error? {
-    gatewayClient = test:mock(http:Client);
+    GatewayClientStub gateway = test:mock(GatewayClientStub);
 
-    test:prepare(gatewayClient).when("get").withArguments("/users")
-        .thenReturn("");
+    json[] returnValue = [{}];
 
-    string jwt = "invalid jwt";
+    test:prepare(gateway)
+        .whenResource("users")
+        .onMethod("get")
+        .withArguments("invalid jwt")
+        .thenReturn(returnValue);
 
-    http:Response|error response = check gatewayClient->/users.get(params = {
-        "jwt": jwt
-    });
+    var response = gateway->/users(jwt = "invalid jwt");
 
-    test:assertTrue(response is error);
+    test:assertTrue(response is json[]);
+    test:assertExactEquals(response, returnValue);
 }
 
 @test:Config
 public function testGetUsersWithValidJwt() returns error? {
-    http:Response response = check gatewayClient->/jwt.get();
+    GatewayClientStub gateway = test:mock(GatewayClientStub);
 
-    string jwt = check response.getTextPayload();
+    test:prepare(gateway)
+        .whenResource("jwt")
+        .onMethod("get")
+        .thenReturn("");
 
-    response = check gatewayClient->/users.get(params = {
-        "jwt": jwt
-    });
+    var jwt = gateway->/jwt();
 
-    test:assertEquals(response.statusCode, http:STATUS_OK);
+    test:assertTrue(jwt is string);
+    test:assertExactEquals(jwt, "");
+
+    json[] returnValue = [{}];
+
+    test:prepare(gateway)
+        .whenResource("users")
+        .onMethod("get")
+        .thenReturn(returnValue);
+
+    var users = gateway->/users(jwt = check jwt);
+
+    test:assertTrue(users is json[]);
 }
 
 @test:Config
 public function testGetPollsWithInvalidJwt() returns error? {
-    string jwt = "invalid jwt";
+    GatewayClientStub gateway = test:mock(GatewayClientStub);
 
-    http:Response|error response = gatewayClient->/polls.get(params = {
-        "jwt": jwt
-    });
+    string invalidJwt = "invalid jwt";
+    json[] returnValue = [{}];
 
-    test:assertTrue(response is error);
+    test:prepare(gateway)
+        .whenResource("polls")
+        .onMethod("get")
+        .withArguments(invalidJwt)
+        .thenReturn(returnValue);
+
+    var response = gateway->/polls(jwt = invalidJwt);
+
+    test:assertTrue(response is json[]);
+    test:assertExactEquals(response, returnValue);
 }
 
 @test:Config
 public function testGetPollsWithValidJwt() returns error? {
-    http:Response response = check gatewayClient->/jwt.get();
+    GatewayClientStub gateway = test:mock(GatewayClientStub);
 
-    string jwt = check response.getTextPayload();
+    test:prepare(gateway)
+        .whenResource("jwt")
+        .onMethod("get")
+        .thenReturn("");
 
-    response = check gatewayClient->/polls.get(params = {
-        "jwt": jwt
-    });
+    var jwt = gateway->/jwt();
 
-    test:assertEquals(response.statusCode, http:STATUS_OK);
+    test:assertTrue(jwt is string);
+    test:assertExactEquals(jwt, "");
+
+    json[] returnValue = [{}];
+
+    test:prepare(gateway)
+        .whenResource("polls")
+        .onMethod("get")
+        .thenReturn(returnValue);
+
+    var polls = gateway->/polls(jwt = check jwt);
+
+    test:assertTrue(polls is json[]);
 }
