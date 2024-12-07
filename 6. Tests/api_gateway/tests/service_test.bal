@@ -6,14 +6,20 @@ http:Client gatewayClient = check new (string `http://localhost:${port}`);
 @test:Config
 public function testGetJwt() returns error? {
     http:Response response = check gatewayClient->/jwt.get();
+
     test:assertEquals(response.statusCode, http:STATUS_OK);
 }
 
 @test:Config
 public function testGetUsersWithInvalidJwt() returns error? {
+    gatewayClient = test:mock(http:Client);
+
+    test:prepare(gatewayClient).when("get").withArguments("/users")
+        .thenReturn("");
+
     string jwt = "invalid jwt";
 
-    http:Response|error response = gatewayClient->/users.get(params = {
+    http:Response|error response = check gatewayClient->/users.get(params = {
         "jwt": jwt
     });
 
