@@ -105,3 +105,121 @@ public function testGetPollsWithValidJwt() returns error? {
 
     test:assertTrue(polls is json[]);
 }
+
+@test:Config
+public function testGetJwtReturnsError() returns error? {
+    GatewayClientStub gateway = test:mock(GatewayClientStub);
+
+    var returnValue = error("Failed to generate JWT");
+    test:prepare(gateway)
+        .whenResource("jwt")
+        .onMethod("get")
+        .thenReturn(returnValue);
+
+    var response = gateway->/jwt();
+
+    test:assertTrue(response is error);
+    test:assertExactEquals(response, returnValue);
+}
+
+@test:Config
+public function testGetUsersReturnsError() returns error? {
+    GatewayClientStub gateway = test:mock(GatewayClientStub);
+
+    var returnValue = error("Failed to fetch users");
+    test:prepare(gateway)
+        .whenResource("users")
+        .onMethod("get")
+        .withArguments("validJwt")
+        .thenReturn(returnValue);
+
+    var response = gateway->/users(jwt = "validJwt");
+
+    test:assertTrue(response is error);
+    test:assertExactEquals(response, returnValue);
+
+}
+
+@test:Config
+public function testGetUsersWithEmptyJwt() returns error? {
+    GatewayClientStub gateway = test:mock(GatewayClientStub);
+
+    var returnValue = error("Failed to validate JWT");
+    test:prepare(gateway)
+        .whenResource("users")
+        .onMethod("get")
+        .withArguments("")
+        .thenReturn(returnValue);
+
+    var response = gateway->/users(jwt = "");
+
+    test:assertTrue(response is error);
+    test:assertExactEquals(response, returnValue);
+}
+
+@test:Config
+public function testGetPollsReturnsError() returns error? {
+    GatewayClientStub gateway = test:mock(GatewayClientStub);
+
+    var returnValue = error("Failed to fetch polls");
+    test:prepare(gateway)
+        .whenResource("polls")
+        .onMethod("get")
+        .withArguments("validJwt")
+        .thenReturn(returnValue);
+
+    var response = gateway->/polls(jwt = "validJwt");
+
+    test:assertTrue(response is error);
+    test:assertExactEquals(response, returnValue);
+}
+
+@test:Config
+public function testGetPollsWithEmptyJwt() returns error? {
+    GatewayClientStub gateway = test:mock(GatewayClientStub);
+
+    var returnValue = error("Failed to validate JWT");
+    test:prepare(gateway)
+        .whenResource("polls")
+        .onMethod("get")
+        .withArguments("")
+        .thenReturn(returnValue);
+
+    var response = gateway->/polls(jwt = "");
+    test:assertTrue(response is error);
+    test:assertExactEquals(response, returnValue);
+}
+
+@test:Config
+public function testGetUsersWithMultipleJsonObjects() returns error? {
+    GatewayClientStub gateway = test:mock(GatewayClientStub);
+
+    json[] returnValue = [{"name": "user1"}, {"name": "user2"}];
+    test:prepare(gateway)
+        .whenResource("users")
+        .onMethod("get")
+        .withArguments("validJwt")
+        .thenReturn(returnValue);
+
+    var response = gateway->/users(jwt = "validJwt");
+
+    test:assertTrue(response is json[]);
+    test:assertExactEquals(response, returnValue);
+}
+
+@test:Config
+public function testGetPollsWithMultipleJsonObjects() returns error? {
+    GatewayClientStub gateway = test:mock(GatewayClientStub);
+
+    json[] returnValue = [{"id": "poll1"}, {"id": "poll2"}];
+    test:prepare(gateway)
+        .whenResource("polls")
+        .onMethod("get")
+        .withArguments("validJwt")
+        .thenReturn(returnValue);
+
+    var response = gateway->/polls(jwt = "validJwt");
+
+    test:assertTrue(response is json[]);
+    test:assertExactEquals(response, returnValue);
+}
